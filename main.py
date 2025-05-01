@@ -11,7 +11,7 @@ def on_click(x, y, button, pressed):
     global lookMonitorIndex
     # button.x2 is the top side button on the mouse
     if button == Button.x2 and pressed:
-        monitorManager.switchMonitor(lookMonitorIndex[0], mouse)
+        monitorManager.switchMonitor(lookMonitorIndex, mouse)
 
 
 def main():

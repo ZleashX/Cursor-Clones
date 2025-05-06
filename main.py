@@ -3,37 +3,26 @@ import mediapipe as mp
 import numpy as np
 from pynput.mouse import Controller, Listener, Button
 from monitor import MonitorManager
+from cursorOverlay import CursorOverlay
 
-from utils import bgr2rgb, mirrorImage
+from utils import bgr2rgb, mirrorImage, createCallibrateWindow
 from head_orientation import pipelineHeadTiltPose
 
-def on_click(x, y, button, pressed):
+def onClick(x, y, button, pressed):
     global lookMonitorIndex
     # button.x2 is the top side button on the mouse
     if button == Button.x2 and pressed:
         monitorManager.switchMonitor(lookMonitorIndex, mouse)
 
-def on_move(x, y):
+def onMove(x, y):
     monitorManager.isCursorCrossMonitor(mouse)
 
-def calibrate_monitors(face_mesh, cap, monitorManager):
+def calibrateMonitors(face_mesh, cap, monitorManager):
     num_monitors = monitorManager.total_monitors
     monitor_yaws = []
 
     for monitor_idx in range(num_monitors):
-        print(f"Calibrating monitor {monitor_idx}. Look at it and press 'c' when ready.")
-        while True:
-            success, image = cap.read()
-            if not success:
-                continue
-            image = mirrorImage(image)
-            cv2.putText(image, f"Look at monitor {monitor_idx} and press 'c'", (50, 50), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-            cv2.imshow('Calibration', image)
-            key = cv2.waitKey(1)
-            if key == ord('c'):
-                cv2.destroyWindow('Calibration')
-                break
+        createCallibrateWindow(monitorManager.monitor_list[monitor_idx])
 
         samples = []
         for _ in range(30):
@@ -54,7 +43,7 @@ def calibrate_monitors(face_mesh, cap, monitorManager):
 
     return monitor_yaws
 
-def compute_thresholds(monitor_yaws):
+def computeThresholds(monitor_yaws):
     thresholds = []
     for i in range(len(monitor_yaws)-1):
         thresholds.append((monitor_yaws[i] + monitor_yaws[i+1]) / 2)
@@ -65,9 +54,8 @@ def main():
     with mp_face_mesh.FaceMesh(max_num_faces=1, refine_landmarks=False, min_detection_confidence=0.5, min_tracking_confidence=0.5) as face_mesh:
 
         # Calibration
-        monitor_yaws = calibrate_monitors(face_mesh, cap, monitorManager)
-        thresholds = compute_thresholds(monitor_yaws)
-
+        monitor_yaws = calibrateMonitors(face_mesh, cap, monitorManager)
+        thresholds = computeThresholds(monitor_yaws)
         # Main loop
         while cap.isOpened():
             success, image = cap.read()
@@ -103,6 +91,7 @@ def main():
             if cv2.waitKey(1) == ord('q'):
                 break
     cap.release()
+    overlay.stop()
 
 if __name__ == "__main__":
     mp_drawing = mp.solutions.drawing_utils
@@ -114,7 +103,8 @@ if __name__ == "__main__":
     mouse = Controller()
     monitorManager = MonitorManager()
     lookMonitorIndex = 0
-    listener = Listener(on_click=on_click, on_move=on_move)
+    listener = Listener(on_click=onClick, on_move=onMove)
     listener.start()
-
+    overlay = CursorOverlay(monitorManager)
+    overlay.start()
     main()

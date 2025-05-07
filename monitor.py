@@ -12,13 +12,14 @@ class Monitor:
 
 
 class MonitorManager:
-    def __init__(self):
+    def __init__(self, follow_mode = False):
         monitors = get_monitors()
         self.total_monitors = len(monitors)
         self.monitor_list = [Monitor(m.width, m.height, m.x, m.y) for m in monitors]
         # Sort monitors by x coordinate to ensure left-to-right order
         self.monitor_list.sort(key=lambda monitor: monitor.x)
         self.active_monitor_index = 0
+        self.follow_mode = follow_mode
 
     def print_info(self):
         for i, monitor in enumerate(self.monitor_list):
@@ -36,12 +37,20 @@ class MonitorManager:
     
     def switchMonitor(self, monitor_index, mouse):
         if 0 <= monitor_index < self.total_monitors and monitor_index != self.active_monitor_index:
-            if self.isPointInMonitor(mouse.position[0], mouse.position[1], self.active_monitor_index):
-                self.monitor_list[self.active_monitor_index].last_position = mouse.position
+            if not self.follow_mode:
+                mouse.position = self.monitor_list[monitor_index].last_position
             else:
-                self.monitor_list[self.active_monitor_index].last_position = self.monitor_list[self.active_monitor_index].center
+                x, y = mouse.position
+                active_monitor = self.monitor_list[self.active_monitor_index]
+                active_x = x - active_monitor.x
+                active_y = y - active_monitor.y
+                ratio_x = active_x / active_monitor.width
+                ratio_y = active_y / active_monitor.height
+                x_new = int(self.monitor_list[monitor_index].width * ratio_x) + self.monitor_list[monitor_index].x
+                y_new = int(self.monitor_list[monitor_index].height * ratio_y) + self.monitor_list[monitor_index].y
+                mouse.position = (x_new, y_new)
             self.active_monitor_index = monitor_index
-            mouse.position = self.monitor_list[monitor_index].last_position
+
 
     def isCursorCrossMonitor(self, mouse):
         #called when the mouse is moved to check if the cursor is crossing monitors manually

@@ -101,10 +101,10 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(0)
 
     mouse = Controller()
-    monitorManager = MonitorManager()
+    monitorManager = MonitorManager(follow_mode=True)
     lookMonitorIndex = 0
     listener = Listener(on_click=onClick, on_move=onMove)
     listener.start()
-    overlay = CursorOverlay(monitorManager)
+    overlay = CursorOverlay(monitorManager,mouse)
     overlay.start()
     main()

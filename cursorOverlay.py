@@ -3,8 +3,9 @@ import threading
 import time
 
 class CursorOverlay(threading.Thread):
-    def __init__(self, monitor_manager):
+    def __init__(self, monitor_manager, mouse):
         threading.Thread.__init__(self)
+        self.mouse = mouse
         self.monitor_manager = monitor_manager
         self.stop_event = threading.Event()
         self.daemon = True  # Thread will exit when main program exits
@@ -47,21 +48,31 @@ class CursorOverlay(threading.Thread):
             canvas.delete("all")
             
             if i != self.monitor_manager.active_monitor_index:
-                x, y = monitor.last_position
-                local_x = x - monitor.x
-                local_y = y - monitor.y
-                
+                if not self.monitor_manager.follow_mode:
+                    x, y = monitor.last_position
+                    local_x = x - monitor.x
+                    local_y = y - monitor.y
+                else:
+                    x, y = self.mouse.position
+                    active_monitor = self.monitor_manager.monitor_list[self.monitor_manager.active_monitor_index]
+                    active_x = x - active_monitor.x
+                    active_y = y - active_monitor.y
+                    ratio_x = active_x / active_monitor.width
+                    ratio_y = active_y / active_monitor.height
+                    local_x = int(monitor.width * ratio_x)
+                    local_y = int(monitor.height * ratio_y)
+                    
                 # Draw cursor
                 cursor_size = 15
                 canvas.create_oval(local_x-cursor_size, local_y-cursor_size,
-                                  local_x+cursor_size, local_y+cursor_size,
-                                  outline='red', width=2)
+                                local_x+cursor_size, local_y+cursor_size,
+                                outline='red', width=2)
                 canvas.create_line(local_x-cursor_size, local_y,
-                                 local_x+cursor_size, local_y,
-                                 fill='red', width=2)
+                                local_x+cursor_size, local_y,
+                                fill='red', width=2)
                 canvas.create_line(local_x, local_y-cursor_size,
-                                 local_x, local_y+cursor_size,
-                                 fill='red', width=2)
+                                local_x, local_y+cursor_size,
+                                fill='red', width=2)
     
     def stop(self):
         self.stop_event.set()

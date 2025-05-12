@@ -22,7 +22,7 @@ def createCallibrateWindow(monitor):
     window.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
     window.title("Calibration")
 
-    label = tk.Label(window, text="Look at this monitor and press the button", font=("Arial", 24), wraplength=window_width) 
+    label = tk.Label(window, text="Look at this monitor and press the Calibrate Button and stay still for 2 seconds", font=("Arial", 24), wraplength=window_width) 
     label.pack(expand=True, fill=tk.BOTH)
     button = tk.Button(window, text="Calibrate", command=window.destroy, bg="blue", font=("Arial", 24))
     button.pack(expand=True, fill=tk.BOTH)

@@ -80,11 +80,11 @@ def main():
                         break
 
             # Display info
-            cv2.putText(image, f"Yaw: {yaw:.2f}, Monitor: {lookMonitorIndex}", (10, 30), 
+            cv2.putText(image, f"Yaw: {yaw:.2f}, Monitor: {lookMonitorIndex + 1}", (10, 30), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
             cv2.putText(image, f"Mouse Position: {mouse.position}", (10, 60), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-            cv2.putText(image, f"Active Monitor: {monitorManager.active_monitor_index}", (10, 90),
+            cv2.putText(image, f"Active Monitor: {monitorManager.active_monitor_index + 1}", (10, 90),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
             cv2.imshow('Face Mesh', image)
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(0)
 
     mouse = Controller()
-    monitorManager = MonitorManager(follow_mode=True)
+    monitorManager = MonitorManager(follow_mode=True) #Cursor Clones follow toggle
     lookMonitorIndex = 0
     listener = Listener(on_click=onClick, on_move=onMove)
     listener.start()

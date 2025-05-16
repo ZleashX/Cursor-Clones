@@ -1,6 +1,7 @@
 import tkinter as tk
 import threading
 from utils import CursorMode
+from PIL import Image, ImageTk
 
 class CursorOverlay(threading.Thread):
     def __init__(self, monitor_manager, mouse):
@@ -30,15 +31,19 @@ class CursorOverlay(threading.Thread):
             window = tk.Toplevel()
             window.attributes('-alpha', 0.7)
             window.attributes('-topmost', True)
-            window.attributes('-transparentcolor', 'white')
+            window.attributes('-transparentcolor', 'green')
             window.overrideredirect(1)
                        
             window.geometry(f"{monitor.width}x{monitor.height}+{monitor.x}+{monitor.y}")
-            canvas = tk.Canvas(window, bg='white', highlightthickness=0)
+            canvas = tk.Canvas(window, bg='green', highlightthickness=0)
             canvas.pack(fill=tk.BOTH, expand=True)
             
             self.windows.append(window)
             self.canvases.append(canvas)
+        
+        image = Image.open("cursor.png")
+        image = image.resize((16,24))
+        self.photo = ImageTk.PhotoImage(image)
     
     def updateOverlays(self):
         for i, (monitor, canvas) in enumerate(zip(self.monitor_manager.monitor_list, self.canvases)):
@@ -63,17 +68,8 @@ class CursorOverlay(threading.Thread):
                     local_y = int(monitor.height * ratio_y)
                     
                 # Draw cursor
-                cursor_size = 15
-                canvas.create_oval(local_x-cursor_size, local_y-cursor_size,
-                                local_x+cursor_size, local_y+cursor_size,
-                                outline='red', width=2)
-                canvas.create_line(local_x-cursor_size, local_y,
-                                local_x+cursor_size, local_y,
-                                fill='red', width=2)
-                canvas.create_line(local_x, local_y-cursor_size,
-                                local_x, local_y+cursor_size,
-                                fill='red', width=2)
-    
+                canvas.create_image(local_x, local_y, image=self.photo, anchor="nw")
+
     def stop(self):
         self.stop_event.set()
     

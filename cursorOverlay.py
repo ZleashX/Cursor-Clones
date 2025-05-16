@@ -1,6 +1,6 @@
 import tkinter as tk
 import threading
-import time
+from utils import CursorMode
 
 class CursorOverlay(threading.Thread):
     def __init__(self, monitor_manager, mouse):
@@ -22,7 +22,6 @@ class CursorOverlay(threading.Thread):
             while not self.stop_event.is_set():
                 self.updateOverlays()
                 self.root.update()  # Process Tkinter events
-                time.sleep(0.05)  # 20 FPS refresh rate
         finally:
             self.cleanup()
     
@@ -46,13 +45,14 @@ class CursorOverlay(threading.Thread):
             if not canvas.winfo_exists():  # Check if the canvas still exists
                 continue
             canvas.delete("all")
-            
-            if i != self.monitor_manager.active_monitor_index:
-                if not self.monitor_manager.follow_mode:
+            local_x = 0
+            local_y = 0
+            if i != self.monitor_manager.active_monitor_index and self.monitor_manager.cursor_mode not in [CursorMode.LASTLOC_NOCLONE, CursorMode.FOLLOW_NOCLONE]:
+                if self.monitor_manager.cursor_mode == CursorMode.LASTLOC_ClONE:
                     x, y = monitor.last_position
                     local_x = x - monitor.x
                     local_y = y - monitor.y
-                else:
+                elif self.monitor_manager.cursor_mode == CursorMode.FOLLOW_CLONE:
                     x, y = self.mouse.position
                     active_monitor = self.monitor_manager.monitor_list[self.monitor_manager.active_monitor_index]
                     active_x = x - active_monitor.x

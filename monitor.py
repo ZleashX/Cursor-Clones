@@ -1,4 +1,5 @@
 from screeninfo import get_monitors
+from utils import CursorMode
 
 class Monitor:
     def __init__(self, width, height, x, y):
@@ -12,14 +13,14 @@ class Monitor:
 
 
 class MonitorManager:
-    def __init__(self, follow_mode = False):
+    def __init__(self, cursor_mode = CursorMode.LASTLOC_ClONE):
         monitors = get_monitors()
         self.total_monitors = len(monitors)
         self.monitor_list = [Monitor(m.width, m.height, m.x, m.y) for m in monitors]
         # Sort monitors by x coordinate to ensure left-to-right order
         self.monitor_list.sort(key=lambda monitor: monitor.x)
         self.active_monitor_index = 0
-        self.follow_mode = follow_mode
+        self.cursor_mode = cursor_mode
 
     def print_info(self):
         for i, monitor in enumerate(self.monitor_list):
@@ -37,7 +38,7 @@ class MonitorManager:
     
     def switchMonitor(self, monitor_index, mouse):
         if 0 <= monitor_index < self.total_monitors and monitor_index != self.active_monitor_index:
-            if not self.follow_mode:
+            if self.cursor_mode in [CursorMode.LASTLOC_ClONE, CursorMode.LASTLOC_NOCLONE]:
                 mouse.position = self.monitor_list[monitor_index].last_position
             else:
                 x, y = mouse.position

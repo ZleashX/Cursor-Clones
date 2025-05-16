@@ -1,6 +1,7 @@
 import cv2
 import tkinter as tk
 import sys
+from enum import Enum
 
 def bgr2rgb(image):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -39,3 +40,9 @@ def createCallibrateWindow(monitor):
     button.pack(expand=True, fill=tk.BOTH)
     
     window.mainloop()
+
+class CursorMode(Enum):
+    LASTLOC_ClONE = 0
+    LASTLOC_NOCLONE = 1
+    FOLLOW_CLONE = 2
+    FOLLOW_NOCLONE = 3

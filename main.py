@@ -1,12 +1,14 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-from pynput.mouse import Controller, Listener, Button
+from pynput.mouse import Controller, Button
+from pynput import mouse as mousemod, keyboard
 from monitor import MonitorManager
 from cursorOverlay import CursorOverlay
 
 from utils import bgr2rgb, mirrorImage, createCallibrateWindow
 from head_orientation import pipelineHeadTiltPose
+from utils import CursorMode
 
 def onClick(x, y, button, pressed):
     global lookMonitorIndex
@@ -16,6 +18,12 @@ def onClick(x, y, button, pressed):
 
 def onMove(x, y):
     monitorManager.isCursorCrossMonitor(mouse)
+
+def onPress(key):
+    if hasattr(key, "char") and key.char == 'c':
+        idx = monitorManager.cursor_mode.value
+        monitorManager.cursor_mode = CursorMode((idx + 1) % len(CursorMode))
+        
 
 def calibrateMonitors(face_mesh, cap, monitorManager):
     num_monitors = monitorManager.total_monitors
@@ -101,10 +109,12 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(0)
 
     mouse = Controller()
-    monitorManager = MonitorManager(follow_mode=True) #Cursor Clones follow toggle
+    monitorManager = MonitorManager() #Cursor Clones follow toggle
     lookMonitorIndex = 0
-    listener = Listener(on_click=onClick, on_move=onMove)
-    listener.start()
+    mouselistener = mousemod.Listener(on_click=onClick, on_move=onMove)
+    mouselistener.start()
+    keyboardlistener = keyboard.Listener(on_press=onPress)
+    keyboardlistener.start()
     overlay = CursorOverlay(monitorManager,mouse)
     overlay.start()
     main()

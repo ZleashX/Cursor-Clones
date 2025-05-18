@@ -21,6 +21,7 @@ class MonitorManager:
         self.monitor_list.sort(key=lambda monitor: monitor.x)
         self.active_monitor_index = 0
         self.cursor_mode = cursor_mode
+        self.iswitching = False
 
     def print_info(self):
         for i, monitor in enumerate(self.monitor_list):
@@ -38,7 +39,9 @@ class MonitorManager:
     
     def switchMonitor(self, monitor_index, mouse):
         if 0 <= monitor_index < self.total_monitors and monitor_index != self.active_monitor_index:
+            self.iswitching = True
             if self.cursor_mode in [CursorMode.LASTLOC_ClONE, CursorMode.LASTLOC_NOCLONE]:
+                self.monitor_list[self.active_monitor_index].last_position = mouse.position
                 mouse.position = self.monitor_list[monitor_index].last_position
             else:
                 x, y = mouse.position
@@ -51,6 +54,7 @@ class MonitorManager:
                 y_new = int(self.monitor_list[monitor_index].height * ratio_y) + self.monitor_list[monitor_index].y
                 mouse.position = (x_new, y_new)
             self.active_monitor_index = monitor_index
+            self.iswitching = False
 
 
     def isCursorCrossMonitor(self, mouse):
@@ -58,7 +62,7 @@ class MonitorManager:
         #if the cursor is in the current monitor, do nothing
         #if the cursor is in another monitor, switch to that monitor, and set the last position of the last monitor to the center
         current_monitor_index = self.getMonitorIndexAtPoint(mouse.position[0], mouse.position[1])
-        if current_monitor_index is not None and current_monitor_index != self.active_monitor_index:
+        if current_monitor_index is not None and current_monitor_index != self.active_monitor_index and not self.iswitching:
             self.monitor_list[self.active_monitor_index].last_position = self.monitor_list[self.active_monitor_index].center
             self.active_monitor_index = current_monitor_index
         

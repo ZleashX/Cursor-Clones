@@ -20,6 +20,7 @@ class MonitorManager:
         # Sort monitors by x coordinate to ensure left-to-right order
         self.monitor_list.sort(key=lambda monitor: monitor.x)
         self.active_monitor_index = 0
+        self.look_monitor_index = 0
         self.cursor_mode = cursor_mode
         self.iswitching = False
 
@@ -37,12 +38,12 @@ class MonitorManager:
         monitor = self.monitor_list[monitor_index]
         return monitor.x <= x < monitor.x + monitor.width and monitor.y <= y < monitor.y + monitor.height
     
-    def switchMonitor(self, monitor_index, mouse):
-        if 0 <= monitor_index < self.total_monitors and monitor_index != self.active_monitor_index:
+    def switchMonitor(self, mouse):
+        if 0 <= self.look_monitor_index < self.total_monitors and self.look_monitor_index != self.active_monitor_index:
             self.iswitching = True
             if self.cursor_mode in [CursorMode.LASTLOC_ClONE, CursorMode.LASTLOC_NOCLONE]:
                 self.monitor_list[self.active_monitor_index].last_position = mouse.position
-                mouse.position = self.monitor_list[monitor_index].last_position
+                mouse.position = self.monitor_list[self.look_monitor_index].last_position
             else:
                 x, y = mouse.position
                 active_monitor = self.monitor_list[self.active_monitor_index]
@@ -50,10 +51,10 @@ class MonitorManager:
                 active_y = y - active_monitor.y
                 ratio_x = active_x / active_monitor.width
                 ratio_y = active_y / active_monitor.height
-                x_new = int(self.monitor_list[monitor_index].width * ratio_x) + self.monitor_list[monitor_index].x
-                y_new = int(self.monitor_list[monitor_index].height * ratio_y) + self.monitor_list[monitor_index].y
+                x_new = int(self.monitor_list[self.look_monitor_index].width * ratio_x) + self.monitor_list[self.look_monitor_index].x
+                y_new = int(self.monitor_list[self.look_monitor_index].height * ratio_y) + self.monitor_list[self.look_monitor_index].y
                 mouse.position = (x_new, y_new)
-            self.active_monitor_index = monitor_index
+            self.active_monitor_index = self.look_monitor_index
             self.iswitching = False
 
 

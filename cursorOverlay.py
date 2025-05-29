@@ -1,5 +1,7 @@
 import tkinter as tk
 import threading
+import time
+import colorsys
 from utils import CursorMode
 from PIL import Image, ImageTk
 
@@ -8,6 +10,9 @@ class CursorOverlay(threading.Thread):
         threading.Thread.__init__(self)
         self.mouse = mouse
         self.monitor_manager = monitor_manager
+        self.hue = 0.0
+        self.last_glow_time = [0.0] * monitor_manager.total_monitors
+        self.last_look_monitor_index = -1
         self.stop_event = threading.Event()
         self.daemon = True  # Thread will exit when main program exits
         
@@ -44,14 +49,21 @@ class CursorOverlay(threading.Thread):
         image = Image.open("cursor.png")
         image = image.resize((16,24))
         self.photo = ImageTk.PhotoImage(image)
+
     
     def updateOverlays(self):
+        current_time = time.time()
+        if self.last_look_monitor_index != self.monitor_manager.look_monitor_index:
+            self.last_look_monitor_index = self.monitor_manager.look_monitor_index
+            self.last_glow_time[self.last_look_monitor_index] = current_time
+
         for i, (monitor, canvas) in enumerate(zip(self.monitor_manager.monitor_list, self.canvases)):
             if not canvas.winfo_exists():  # Check if the canvas still exists
                 continue
             canvas.delete("all")
             local_x = 0
             local_y = 0
+
             if i != self.monitor_manager.active_monitor_index and self.monitor_manager.cursor_mode not in [CursorMode.LASTLOC_NOCLONE, CursorMode.FOLLOW_NOCLONE]:
                 if self.monitor_manager.cursor_mode == CursorMode.LASTLOC_ClONE:
                     x, y = monitor.last_position
@@ -66,9 +78,37 @@ class CursorOverlay(threading.Thread):
                     ratio_y = active_y / active_monitor.height
                     local_x = int(monitor.width * ratio_x)
                     local_y = int(monitor.height * ratio_y)
+
+                if self.monitor_manager.look_monitor_index == i and (current_time - self.last_glow_time[i]) < 2.0:
                     
+                    # Calculate center point
+                    cx = local_x + 6
+                    cy = local_y + 12
+
+                    num_rings = 10
+                    for i in range(num_rings):
+                        # Cycle through hue with offset for each ring
+                        hue = (self.hue + i * 0.01) % 1.0
+                        r, g, b = colorsys.hsv_to_rgb(hue, 1, 1)
+                        hex_color = f'#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}'
+                        
+                        radius = 40 - i * 2  # Decreasing radii
+                        canvas.create_oval(
+                            cx - radius,
+                            cy - radius,
+                            cx + radius,
+                            cy + radius,
+                            fill=hex_color,
+                            outline='',
+                            stipple='gray75',
+                            width=0
+                        )
+                    # control the hue cycle speed
+                    self.hue = (self.hue + 0.0001) % 1.0
+
                 # Draw cursor
                 canvas.create_image(local_x, local_y, image=self.photo, anchor="nw")
+                
 
     def stop(self):
         self.stop_event.set()

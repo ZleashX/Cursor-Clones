@@ -11,10 +11,9 @@ from head_orientation import pipelineHeadTiltPose
 from utils import CursorMode
 
 def onClick(x, y, button, pressed):
-    global lookMonitorIndex
     # button.x2 is the top side button on the mouse
     if button == Button.x2 and pressed:
-        monitorManager.switchMonitor(lookMonitorIndex, mouse)
+        monitorManager.switchMonitor(mouse)
 
 def onMove(x, y):
     monitorManager.isCursorCrossMonitor(mouse)
@@ -58,7 +57,7 @@ def computeThresholds(monitor_yaws):
     return thresholds
 
 def main():
-    global lookMonitorIndex
+    global look_monitor_index
     with mp_face_mesh.FaceMesh(max_num_faces=1, refine_landmarks=False, min_detection_confidence=0.5, min_tracking_confidence=0.5) as face_mesh:
 
         # Calibration
@@ -80,15 +79,16 @@ def main():
                 yaw = pipelineHeadTiltPose(image, face_landmarks)
 
                 # Determine monitor based on thresholds
-                lookMonitorIndex = 0
+                look_monitor_index = 0
                 for i, thresh in enumerate(thresholds):
                     if yaw >= thresh:
-                        lookMonitorIndex = i + 1
+                        look_monitor_index = i + 1
                     else:
                         break
-
+            
+            monitorManager.look_monitor_index = look_monitor_index
             # Display info
-            cv2.putText(image, f"Yaw: {yaw:.2f}, Monitor: {lookMonitorIndex + 1}", (10, 30), 
+            cv2.putText(image, f"Yaw: {yaw:.2f}, Monitor: {look_monitor_index + 1}", (10, 30), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
             cv2.putText(image, f"Mouse Position: {mouse.position}", (10, 60), 
                         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     mouse = Controller()
     monitorManager = MonitorManager() #Cursor Clones follow toggle
-    lookMonitorIndex = 0
+    look_monitor_index = 0
     mouselistener = mousemod.Listener(on_click=onClick, on_move=onMove)
     mouselistener.start()
     keyboardlistener = keyboard.Listener(on_press=onPress)

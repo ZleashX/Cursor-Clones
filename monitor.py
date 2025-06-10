@@ -67,6 +67,10 @@ class MonitorManager:
             self.monitor_list[self.active_monitor_index].last_position = self.monitor_list[self.active_monitor_index].center
             self.active_monitor_index = current_monitor_index
         
+    def resetMonitors(self):
+        # Reset all monitors to their last position
+        for monitor in self.monitor_list:
+            monitor.last_position = monitor.center
         
 if __name__ == "__main__":
     monitor_manager = MonitorManager()

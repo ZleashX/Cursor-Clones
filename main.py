@@ -22,6 +22,11 @@ def onPress(key):
     if hasattr(key, "char") and key.char == 'c':
         idx = monitorManager.cursor_mode.value
         monitorManager.cursor_mode = CursorMode((idx + 1) % len(CursorMode))
+    if hasattr(key, "char") and key.char == 'x':
+        idx = monitorManager.cursor_mode.value
+        monitorManager.cursor_mode = CursorMode((idx - 1) % len(CursorMode))
+    if hasattr(key, "char") and key.char == 'r':
+        monitorManager.resetMonitors()
         
 
 def calibrateMonitors(face_mesh, cap, monitorManager):

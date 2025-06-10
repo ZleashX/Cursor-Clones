@@ -42,7 +42,7 @@ def createCallibrateWindow(monitor):
     window.mainloop()
 
 class CursorMode(Enum):
-    LASTLOC_ClONE = 0
-    LASTLOC_NOCLONE = 1
-    FOLLOW_CLONE = 2
-    FOLLOW_NOCLONE = 3
+    FM_NOCLONE = 0
+    FM_ClONE = 1
+    FR_NOCLONE = 2
+    FR_CLONE = 3

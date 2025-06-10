@@ -13,7 +13,7 @@ class Monitor:
 
 
 class MonitorManager:
-    def __init__(self, cursor_mode = CursorMode.LASTLOC_ClONE):
+    def __init__(self):
         monitors = get_monitors()
         self.total_monitors = len(monitors)
         self.monitor_list = [Monitor(m.width, m.height, m.x, m.y) for m in monitors]
@@ -21,7 +21,7 @@ class MonitorManager:
         self.monitor_list.sort(key=lambda monitor: monitor.x)
         self.active_monitor_index = 0
         self.look_monitor_index = 0
-        self.cursor_mode = cursor_mode
+        self.cursor_mode = CursorMode.FM_NOCLONE
         self.iswitching = False
 
     def print_info(self):
@@ -41,7 +41,7 @@ class MonitorManager:
     def switchMonitor(self, mouse):
         if 0 <= self.look_monitor_index < self.total_monitors and self.look_monitor_index != self.active_monitor_index:
             self.iswitching = True
-            if self.cursor_mode in [CursorMode.LASTLOC_ClONE, CursorMode.LASTLOC_NOCLONE]:
+            if self.cursor_mode in [CursorMode.FM_ClONE, CursorMode.FM_NOCLONE]:
                 self.monitor_list[self.active_monitor_index].last_position = mouse.position
                 mouse.position = self.monitor_list[self.look_monitor_index].last_position
             else:

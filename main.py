@@ -114,7 +114,7 @@ if __name__ == "__main__":
     cap = cv2.VideoCapture(0)
 
     mouse = Controller()
-    monitorManager = MonitorManager() #Cursor Clones follow toggle
+    monitorManager = MonitorManager()
     look_monitor_index = 0
     mouselistener = mousemod.Listener(on_click=onClick, on_move=onMove)
     mouselistener.start()

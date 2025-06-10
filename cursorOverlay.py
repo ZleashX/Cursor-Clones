@@ -64,12 +64,12 @@ class CursorOverlay(threading.Thread):
             local_x = 0
             local_y = 0
 
-            if i != self.monitor_manager.active_monitor_index and self.monitor_manager.cursor_mode not in [CursorMode.LASTLOC_NOCLONE, CursorMode.FOLLOW_NOCLONE]:
-                if self.monitor_manager.cursor_mode == CursorMode.LASTLOC_ClONE:
+            if i != self.monitor_manager.active_monitor_index and self.monitor_manager.cursor_mode not in [CursorMode.FM_NOCLONE, CursorMode.FR_NOCLONE]:
+                if self.monitor_manager.cursor_mode == CursorMode.FM_ClONE:
                     x, y = monitor.last_position
                     local_x = x - monitor.x
                     local_y = y - monitor.y
-                elif self.monitor_manager.cursor_mode == CursorMode.FOLLOW_CLONE:
+                elif self.monitor_manager.cursor_mode == CursorMode.FR_CLONE:
                     x, y = self.mouse.position
                     active_monitor = self.monitor_manager.monitor_list[self.monitor_manager.active_monitor_index]
                     active_x = x - active_monitor.x
